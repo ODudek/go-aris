@@ -42,11 +42,24 @@ func TestNewArrValue(t *testing.T) {
 		args args
 		want *ArrValue
 	}{
-		// TODO: Add test cases.
+		{
+			name: "array value with one string value",
+			args: args{
+				arr: []Value{
+					NewStrValue("test"),
+				},
+			},
+			want: &ArrValue{
+				typ: ARRAY,
+				arr: []Value{
+					NewStrValue("test"),
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewArrValue(tt.args.arr); !reflect.DeepEqual(got, tt.want) {
+			if got := NewArrValue(tt.args.arr); !reflect.DeepEqual(got.GetValue(), tt.want.GetValue()) {
 				t.Errorf("NewArrValue() = %v, want %v", got, tt.want)
 			}
 		})
