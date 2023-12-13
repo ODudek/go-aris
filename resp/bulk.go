@@ -8,12 +8,16 @@ type BulkValue struct {
 }
 
 func (b *BulkValue) GetValue() []byte {
-	var bytes []byte
+	typLen := len(b.typ)
+	bulkLen := len(b.bulk)
+
+	bytes := make([]byte, 0, typLen+len(strconv.Itoa(bulkLen))+4)
 	bytes = append(bytes, b.typ...)
-	bytes = append(bytes, strconv.Itoa(len(b.bulk))...)
+	bytes = strconv.AppendInt(bytes, int64(bulkLen), 10)
 	bytes = append(bytes, '\r', '\n')
 	bytes = append(bytes, b.bulk...)
 	bytes = append(bytes, '\r', '\n')
+
 	return bytes
 }
 

@@ -5,7 +5,9 @@ type NullValue struct {
 }
 
 func (n *NullValue) GetValue() []byte {
-	var bytes []byte
+	typLen := len(n.typ)
+
+	bytes := make([]byte, 0, typLen+2)
 	bytes = append(bytes, n.typ...)
 	bytes = append(bytes, '\r', '\n')
 	return bytes

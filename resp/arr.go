@@ -9,13 +9,19 @@ type ArrValue struct {
 
 func (a *ArrValue) GetValue() []byte {
 	l := len(a.arr)
-	var bytes []byte
+	typLen := len(a.typ)
+	numLen := len(strconv.Itoa(l))
+
+	bytes := make([]byte, 0, typLen+numLen+2)
 	bytes = append(bytes, a.typ...)
-	bytes = append(bytes, strconv.Itoa(l)...)
+	bytes = strconv.AppendInt(bytes, int64(l), 10)
 	bytes = append(bytes, '\r', '\n')
+
 	for _, v := range a.arr {
-		bytes = append(bytes, v.GetValue()...)
+		valueBytes := v.GetValue()
+		bytes = append(bytes, valueBytes...)
 	}
+
 	return bytes
 }
 

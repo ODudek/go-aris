@@ -6,10 +6,14 @@ type StrValue struct {
 }
 
 func (s *StrValue) GetValue() []byte {
-	var bytes []byte
+	typLen := len(s.typ)
+	strLen := len(s.str)
+
+	bytes := make([]byte, 0, typLen+strLen+2)
 	bytes = append(bytes, s.typ...)
 	bytes = append(bytes, s.str...)
 	bytes = append(bytes, '\r', '\n')
+
 	return bytes
 }
 
