@@ -23,3 +23,7 @@ func NewStrValue(str string) *StrValue {
 		str: str,
 	}
 }
+
+func (s *StrValue) GetString() string {
+	return s.str
+}

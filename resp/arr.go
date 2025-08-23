@@ -31,3 +31,7 @@ func NewArrValue(arr []Value) *ArrValue {
 		arr: arr,
 	}
 }
+
+func (a *ArrValue) GetArray() []Value {
+	return a.arr
+}

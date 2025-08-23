@@ -27,3 +27,7 @@ func NewBulkValue(bulk []byte) *BulkValue {
 		bulk: bulk,
 	}
 }
+
+func (b *BulkValue) GetBulkString() []byte {
+	return b.bulk
+}
