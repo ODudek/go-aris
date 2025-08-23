@@ -33,7 +33,7 @@ func (s *Storage) Get(key string) (string, bool) {
 func (s *Storage) HSet(key, field, value string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	
+
 	if s.hashes[key] == nil {
 		s.hashes[key] = make(map[string]string)
 	}
@@ -43,12 +43,12 @@ func (s *Storage) HSet(key, field, value string) {
 func (s *Storage) HGet(key, field string) (string, bool) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	
+
 	hash, exists := s.hashes[key]
 	if !exists {
 		return "", false
 	}
-	
+
 	value, exists := hash[field]
 	return value, exists
 }
@@ -56,12 +56,12 @@ func (s *Storage) HGet(key, field string) (string, bool) {
 func (s *Storage) HGetAll(key string) map[string]string {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	
+
 	hash, exists := s.hashes[key]
 	if !exists {
 		return make(map[string]string)
 	}
-	
+
 	result := make(map[string]string)
 	for field, value := range hash {
 		result[field] = value

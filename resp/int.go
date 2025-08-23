@@ -16,7 +16,7 @@ func (i *IntValue) GetValue() []byte {
 	bytes = append(bytes, i.typ...)
 	bytes = append(bytes, numStr...)
 	bytes = append(bytes, '\r', '\n')
-	
+
 	return bytes
 }
 

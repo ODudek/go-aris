@@ -19,7 +19,7 @@ type Config struct {
 func NewConfig(port string) *Config {
 	storage := storage.NewStorage()
 	parser := commands.NewParser(storage)
-	
+
 	return &Config{
 		Port:    port,
 		Storage: storage,

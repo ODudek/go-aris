@@ -2,9 +2,10 @@ package commands
 
 import (
 	"errors"
+	"strings"
+
 	"github.com/ODudek/go-aris/resp"
 	"github.com/ODudek/go-aris/storage"
-	"strings"
 )
 
 type Parser struct {
@@ -29,7 +30,7 @@ func (p *Parser) Parse(value resp.Value) (Command, error) {
 
 	command := strings.ToUpper(p.extractString(arr.GetArray()[0]))
 	args := make([]string, 0, len(arr.GetArray())-1)
-	
+
 	for i := 1; i < len(arr.GetArray()); i++ {
 		args = append(args, p.extractString(arr.GetArray()[i]))
 	}
