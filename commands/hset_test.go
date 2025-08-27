@@ -32,7 +32,10 @@ func TestHSetCommand(t *testing.T) {
 		t.Errorf("Expected '%s', got '%s'", expected, string(intVal.GetValue()))
 	}
 
-	value, exists := storage.HGet("hash", "field1")
+	value, exists, err := storage.HGet("hash", "field1")
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
 	if !exists {
 		t.Error("Expected hash field to exist in storage after HSET")
 	}

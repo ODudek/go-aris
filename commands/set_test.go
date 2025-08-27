@@ -30,7 +30,10 @@ func TestSetCommand(t *testing.T) {
 		t.Errorf("Expected 'OK', got '%s'", strVal.GetString())
 	}
 
-	value, exists := storage.Get("testkey")
+	value, exists, err := storage.Get("testkey")
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
 	if !exists {
 		t.Error("Expected key to exist in storage after SET")
 	}

@@ -1,0 +1,308 @@
+syntax = "proto3";
+
+package cluster;
+
+option go_package = "github.com/ODudek/go-aris/proto";
+
+// ClusterService handles internal communication between Aris nodes
+service ClusterService {
+  // Data operations
+  rpc Set(SetRequest) returns (SetResponse);
+  rpc Get(GetRequest) returns (GetResponse);
+  rpc HSet(HSetRequest) returns (HSetResponse);
+  rpc HGet(HGetRequest) returns (HGetResponse);
+  rpc HGetAll(HGetAllRequest) returns (HGetAllResponse);
+  rpc Delete(DeleteRequest) returns (DeleteResponse);
+
+  // Cluster management
+  rpc Ping(PingRequest) returns (PingResponse);
+  rpc NodeInfo(NodeInfoRequest) returns (NodeInfoResponse);
+  rpc ClusterStatus(ClusterStatusRequest) returns (ClusterStatusResponse);
+  rpc Join(JoinRequest) returns (JoinResponse);
+  rpc Leave(LeaveRequest) returns (LeaveResponse);
+
+  // Data synchronization
+  rpc SyncData(SyncDataRequest) returns (SyncDataResponse);
+  rpc ReplicateOperation(ReplicateRequest) returns (ReplicateResponse);
+  rpc TransferKeys(TransferKeysRequest) returns (TransferKeysResponse);
+
+  // Health and monitoring
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+  rpc GetMetrics(MetricsRequest) returns (MetricsResponse);
+}
+
+// Data operation messages
+message SetRequest {
+  string key = 1;
+  string value = 2;
+  bool is_replication = 3;
+  string source_node = 4;
+  int64 timestamp = 5;
+}
+
+message SetResponse {
+  bool success = 1;
+  string error = 2;
+}
+
+message GetRequest {
+  string key = 1;
+  string requesting_node = 2;
+}
+
+message GetResponse {
+  string value = 1;
+  bool found = 2;
+  string error = 3;
+}
+
+message HSetRequest {
+  string key = 1;
+  string field = 2;
+  string value = 3;
+  bool is_replication = 4;
+  string source_node = 5;
+  int64 timestamp = 6;
+}
+
+message HSetResponse {
+  bool success = 1;
+  string error = 2;
+}
+
+message HGetRequest {
+  string key = 1;
+  string field = 2;
+  string requesting_node = 3;
+}
+
+message HGetResponse {
+  string value = 1;
+  bool found = 2;
+  string error = 3;
+}
+
+message HGetAllRequest {
+  string key = 1;
+  string requesting_node = 2;
+}
+
+message HGetAllResponse {
+  map<string, string> fields = 1;
+  string error = 2;
+}
+
+message DeleteRequest {
+  string key = 1;
+  bool is_replication = 2;
+  string source_node = 3;
+  int64 timestamp = 4;
+}
+
+message DeleteResponse {
+  bool success = 1;
+  string error = 2;
+}
+
+// Cluster management messages
+message PingRequest {
+  string node_id = 1;
+  int64 timestamp = 2;
+}
+
+message PingResponse {
+  string node_id = 1;
+  string status = 2;
+  int64 timestamp = 3;
+  string version = 4;
+}
+
+message NodeInfoRequest {
+  string requesting_node = 1;
+}
+
+message NodeInfoResponse {
+  string node_id = 1;
+  string address = 2;
+  string port = 3;
+  string status = 4;
+  int64 uptime = 5;
+  NodeMetrics metrics = 6;
+  repeated string roles = 7;
+}
+
+message NodeMetrics {
+  int64 total_keys = 1;
+  int64 total_memory_usage = 2;
+  int64 connections = 3;
+  int64 operations_per_second = 4;
+  double cpu_usage = 5;
+  double memory_usage_percent = 6;
+}
+
+message ClusterStatusRequest {
+  string requesting_node = 1;
+}
+
+message ClusterStatusResponse {
+  int32 total_nodes = 1;
+  int32 active_nodes = 2;
+  repeated NodeInfo nodes = 3;
+  bool is_healthy = 4;
+  int32 replication_factor = 5;
+  string cluster_id = 6;
+}
+
+message NodeInfo {
+  string node_id = 1;
+  string address = 2;
+  string port = 3;
+  string status = 4;
+  int64 last_seen = 5;
+  NodeMetrics metrics = 6;
+}
+
+message JoinRequest {
+  string node_id = 1;
+  string address = 2;
+  string port = 3;
+  string version = 4;
+  map<string, string> metadata = 5;
+}
+
+message JoinResponse {
+  bool accepted = 1;
+  string cluster_id = 2;
+  repeated NodeInfo existing_nodes = 3;
+  string error = 4;
+  ClusterConfig config = 5;
+}
+
+message ClusterConfig {
+  int32 replication_factor = 1;
+  int32 hash_ring_replicas = 2;
+  int32 sync_interval_seconds = 3;
+  int32 health_check_interval_seconds = 4;
+}
+
+message LeaveRequest {
+  string node_id = 1;
+  bool graceful = 2;
+}
+
+message LeaveResponse {
+  bool success = 1;
+  string error = 2;
+}
+
+// Data synchronization messages
+message SyncDataRequest {
+  string requesting_node = 1;
+  repeated string key_prefixes = 2;
+  int64 since_timestamp = 3;
+  int32 batch_size = 4;
+}
+
+message SyncDataResponse {
+  repeated KeyValue data = 1;
+  repeated HashKeyValue hash_data = 2;
+  bool has_more = 3;
+  string continuation_token = 4;
+  string error = 5;
+}
+
+message KeyValue {
+  string key = 1;
+  string value = 2;
+  int64 timestamp = 3;
+}
+
+message HashKeyValue {
+  string key = 1;
+  map<string, string> fields = 2;
+  int64 timestamp = 3;
+}
+
+message ReplicateRequest {
+  string operation = 1; // SET, HSET, DELETE, etc.
+  string key = 2;
+  string field = 3; // for hash operations
+  string value = 4;
+  string source_node = 5;
+  int64 timestamp = 6;
+  map<string, string> metadata = 7;
+}
+
+message ReplicateResponse {
+  bool success = 1;
+  string error = 2;
+  string node_id = 3;
+}
+
+message TransferKeysRequest {
+  string target_node = 1;
+  repeated string keys = 2;
+  bool delete_after_transfer = 3;
+}
+
+message TransferKeysResponse {
+  int32 transferred_count = 1;
+  repeated string failed_keys = 2;
+  string error = 3;
+}
+
+// Health and monitoring messages
+message HealthCheckRequest {
+  string requesting_node = 1;
+  int64 timestamp = 2;
+}
+
+message HealthCheckResponse {
+  string status = 1; // healthy, unhealthy, degraded
+  NodeMetrics metrics = 2;
+  repeated string issues = 3;
+  int64 timestamp = 4;
+}
+
+message MetricsRequest {
+  string requesting_node = 1;
+  repeated string metric_names = 2;
+}
+
+message MetricsResponse {
+  map<string, double> metrics = 1;
+  NodeMetrics node_metrics = 2;
+  int64 timestamp = 3;
+}
+
+// Streaming services for real-time updates
+service ClusterEventService {
+  rpc SubscribeToClusterEvents(EventSubscriptionRequest) returns (stream ClusterEvent);
+  rpc SubscribeToDataChanges(DataChangeSubscriptionRequest) returns (stream DataChangeEvent);
+}
+
+message EventSubscriptionRequest {
+  string node_id = 1;
+  repeated string event_types = 2;
+}
+
+message ClusterEvent {
+  string event_type = 1; // NODE_JOIN, NODE_LEAVE, NODE_FAILURE, REBALANCE_START, etc.
+  string node_id = 2;
+  int64 timestamp = 3;
+  map<string, string> metadata = 4;
+}
+
+message DataChangeSubscriptionRequest {
+  string node_id = 1;
+  repeated string key_patterns = 2;
+}
+
+message DataChangeEvent {
+  string operation = 1; // SET, DELETE, HSET, HDEL
+  string key = 2;
+  string field = 3;
+  string value = 4;
+  string source_node = 5;
+  int64 timestamp = 6;
+}

@@ -6,18 +6,21 @@ import (
 )
 
 type HGetAllCommand struct {
-	storage *storage.Storage
+	storage storage.StorageInterface
 	key     string
 }
 
 func (h *HGetAllCommand) Execute() (resp.Value, error) {
-	hash := h.storage.HGetAll(h.key)
-
-	result := make([]resp.Value, 0, len(hash)*2)
-	for field, value := range hash {
-		result = append(result, resp.NewBulkValue([]byte(field)))
-		result = append(result, resp.NewBulkValue([]byte(value)))
+	fields, err := h.storage.HGetAll(h.key)
+	if err != nil {
+		return resp.NewErrValue(err.Error()), err
 	}
 
-	return resp.NewArrValue(result), nil
+	values := make([]resp.Value, 0, len(fields)*2)
+	for field, value := range fields {
+		values = append(values, resp.NewBulkValue([]byte(field)))
+		values = append(values, resp.NewBulkValue([]byte(value)))
+	}
+
+	return resp.NewArrValue(values), nil
 }

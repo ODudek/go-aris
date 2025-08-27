@@ -6,13 +6,16 @@ import (
 )
 
 type HSetCommand struct {
-	storage *storage.Storage
+	storage storage.StorageInterface
 	key     string
 	field   string
 	value   string
 }
 
 func (h *HSetCommand) Execute() (resp.Value, error) {
-	h.storage.HSet(h.key, h.field, h.value)
+	err := h.storage.HSet(h.key, h.field, h.value)
+	if err != nil {
+		return resp.NewErrValue(err.Error()), err
+	}
 	return resp.NewIntValue(1), nil
 }

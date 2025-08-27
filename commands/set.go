@@ -6,12 +6,15 @@ import (
 )
 
 type SetCommand struct {
-	storage *storage.Storage
+	storage storage.StorageInterface
 	key     string
 	value   string
 }
 
 func (s *SetCommand) Execute() (resp.Value, error) {
-	s.storage.Set(s.key, s.value)
+	err := s.storage.Set(s.key, s.value)
+	if err != nil {
+		return resp.NewErrValue(err.Error()), err
+	}
 	return resp.NewStrValue("OK"), nil
 }

@@ -6,12 +6,15 @@ import (
 )
 
 type GetCommand struct {
-	storage *storage.Storage
+	storage storage.StorageInterface
 	key     string
 }
 
 func (g *GetCommand) Execute() (resp.Value, error) {
-	value, exists := g.storage.Get(g.key)
+	value, exists, err := g.storage.Get(g.key)
+	if err != nil {
+		return resp.NewErrValue(err.Error()), err
+	}
 	if !exists {
 		return resp.NewNullValue(), nil
 	}
