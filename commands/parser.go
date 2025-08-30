@@ -9,10 +9,10 @@ import (
 )
 
 type Parser struct {
-	storage *storage.Storage
+	storage storage.StorageInterface
 }
 
-func NewParser(s *storage.Storage) *Parser {
+func NewParser(s storage.StorageInterface) *Parser {
 	return &Parser{
 		storage: s,
 	}

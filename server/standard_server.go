@@ -4,12 +4,15 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"net/http"
 
 	"github.com/ODudek/go-aris/resp"
 )
 
 type StandardServer struct {
-	config *Config
+	config     *Config
+	httpServer *http.Server
+	listener   net.Listener
 }
 
 func NewStandardServer(config *Config) *StandardServer {
@@ -21,12 +24,30 @@ func NewStandardServer(config *Config) *StandardServer {
 func (s *StandardServer) Start() error {
 	log.Printf("Starting standard server on %s", s.config.Port)
 
+	// Setup minimal HTTP server for health checks only
+	mux := http.NewServeMux()
+	mux.HandleFunc("/health", s.config.HealthCheckHandler)
+
+	// Start HTTP server on a different port for health checks
+	go func() {
+		healthPort := ":8080" // Default health check port
+		healthServer := &http.Server{
+			Addr:    healthPort,
+			Handler: mux,
+		}
+		log.Printf("Starting health check server on %s", healthPort)
+		if err := healthServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Printf("Health check server error: %v", err)
+		}
+	}()
+
 	l, err := net.Listen("tcp", s.config.Port)
 	if err != nil {
 		return err
 	}
-	defer l.Close()
+	s.listener = l
 
+	// Handle Redis protocol connections
 	for {
 		conn, err := l.Accept()
 		if err != nil {
@@ -39,6 +60,9 @@ func (s *StandardServer) Start() error {
 }
 
 func (s *StandardServer) Stop() error {
+	if s.listener != nil {
+		return s.listener.Close()
+	}
 	return nil
 }
 
